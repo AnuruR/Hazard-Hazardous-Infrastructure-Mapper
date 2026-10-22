@@ -9,8 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb://ruthiraka2003_db_user:grs1yqWSKURoHBRJ@ac-4zee7wd-shard-00-00.gsyiaqu.mongodb.net:27017,ac-4zee7wd-shard-00-01.gsyiaqu.mongodb.net:27017,ac-4zee7wd-shard-00-02.gsyiaqu.mongodb.net:27017/?ssl=true&replicaSet=atlas-fk6cmt-shard-0&authSource=admin&appName=Cluster0";
-console.log("My URI is:", uri);
+const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
 const dbName = "Hazard";
