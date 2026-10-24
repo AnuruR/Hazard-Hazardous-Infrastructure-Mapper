@@ -1,2 +1,8 @@
-node_modules
+# Backend dependencies, local secrets, and generated files
+node_modules/
 .env
+.env.*
+!.env.example
+dist/
+coverage/
+*.log
