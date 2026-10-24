@@ -1,10 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import "./App.css";
 import HazardMap from "./components/HazardMap";
 import Login from "./components/login";
 
 export default function App() {
   const [showMap, setShowMap] = useState(false);
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("hazard_token");
+    if (!token) return;
+    axios.get("/api/me", { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => {
+        setSession({ token, user: data.user });
+        setShowMap(true);
+      })
+      .catch(() => localStorage.removeItem("hazard_token"));
+  }, []);
+
+  const handleAuthenticated = ({ token, user }) => {
+    localStorage.setItem("hazard_token", token);
+    setSession({ token, user });
+    setShowMap(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("hazard_token");
+    setSession(null);
+  };
 
   return (
     <main className={showMap ? "app-page app-page--map" : "app-page"}>
@@ -22,10 +46,10 @@ export default function App() {
             </button>
           </div>
           <div className="access-divider"><span>or sign in</span></div>
-          <Login />
+          <Login onAuthenticated={handleAuthenticated} />
         </section>
       )}
-      {showMap && <HazardMap />}
+      {showMap && <HazardMap session={session} onAuthenticated={handleAuthenticated} onLogout={handleLogout} />}
     </main>
   );
 }

@@ -7,6 +7,10 @@ import authRoutes from "./routes/authRoutes.js";
 // Load backend/.env regardless of the directory used to start Node.
 dotenv.config({ path: new URL("./.env", import.meta.url) });
 
+if (process.env.NODE_ENV === "production" && !process.env.AUTH_TOKEN_SECRET) {
+  throw new Error("AUTH_TOKEN_SECRET must be set in production.");
+}
+
 const app = express();
 app.use(cors());
 app.use(express.json());

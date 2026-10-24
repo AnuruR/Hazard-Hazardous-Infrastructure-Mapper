@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function Login({ initialMode = "login" }) {
+export default function Login({ initialMode = "login", onAuthenticated }) {
   const [isRegistering, setIsRegistering] = useState(
     initialMode === "register",
   );
@@ -19,6 +19,7 @@ export default function Login({ initialMode = "login" }) {
         : { username, password };
 
       const response = await axios.post(endpoint, infoToSend);
+      onAuthenticated?.(response.data);
     } catch (error) {
       alert(error.response?.data?.message || "Could not connect to the server");
     }

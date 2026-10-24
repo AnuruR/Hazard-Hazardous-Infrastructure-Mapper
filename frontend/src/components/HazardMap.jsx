@@ -1,7 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Login from "./login";
 
 function MapUpdater({ latitude, longitude }) {
@@ -15,7 +15,7 @@ function MapUpdater({ latitude, longitude }) {
   return null;
 }
 
-export default function HazardMap() {
+export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [latitude, setLatitude] = useState(6.9271);
   const [longitude, setLongitude] = useState(79.8612);
   const [authMode, setAuthMode] = useState(null);
@@ -50,15 +50,24 @@ export default function HazardMap() {
           </label>
         </div>
         <nav className="map-auth-actions" aria-label="Account actions">
-          <button type="button" className="map-auth-button map-auth-button--login" onClick={() => setAuthMode("login")}>Login</button>
-          <button type="button" className="map-auth-button map-auth-button--register" onClick={() => setAuthMode("register")}>Register</button>
+          {session ? (
+            <>
+              <span className="map-signed-in">Signed in as <strong>{session.user.username}</strong></span>
+              <button type="button" className="map-auth-button map-auth-button--login" onClick={onLogout}>Sign out</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="map-auth-button map-auth-button--login" onClick={() => setAuthMode("login")}>Login</button>
+              <button type="button" className="map-auth-button map-auth-button--register" onClick={() => setAuthMode("register")}>Register</button>
+            </>
+          )}
         </nav>
       </header>
       {authMode && (
         <div className="map-auth-backdrop" onClick={() => setAuthMode(null)}>
           <section className="map-auth-card" onClick={(event) => event.stopPropagation()}>
             <button className="map-auth-close" type="button" aria-label="Close" onClick={() => setAuthMode(null)}>×</button>
-            <Login initialMode={authMode} />
+            <Login initialMode={authMode} onAuthenticated={(data) => { onAuthenticated(data); setAuthMode(null); }} />
           </section>
         </div>
       )}
