@@ -1,36 +1,27 @@
-import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { MongoClient } from "mongodb";
+import express from "express";
+import { connectDB } from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
 
-dotenv.config();
+// Load backend/.env regardless of the directory used to start Node.
+dotenv.config({ path: new URL("./.env", import.meta.url) });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
+app.get("/", (_req, res) => {
+  res.json({ message: "Hazard Mapper API is running." });
+});
+app.use("/api", authRoutes);
 
-const dbName = "Hazard";
+const port = process.env.PORT || 5000;
 
-async function main() {
-  try {
-    //connect to atlas
-    await client.connect();
-    // Creates the database 'hazard_mapper' if it doesn't exist
-    //db = client.db('hazard_mapper');
-    console.log("Successfully connected to MongoDB!");
-  } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
-  }
+try {
+  await connectDB();
+  app.listen(port, () => console.log(`API listening on port ${port}`));
+} catch (error) {
+  console.error("Could not start API:", error.message);
+  process.exit(1);
 }
-
-app.get("/", (req, res) => {
-  res.send("Hazard Mapper API is running successfully!");
-});
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
