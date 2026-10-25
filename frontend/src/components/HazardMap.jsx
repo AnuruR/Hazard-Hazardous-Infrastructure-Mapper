@@ -3,6 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import { useEffect, useState } from "react";
 import Login from "./login";
+import ReportDanger from "./ReportDanger";
 
 function MapUpdater({ latitude, longitude }) {
   const map = useMap();
@@ -32,7 +33,6 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   });
 
   return (
-    
     <div className="hazard-map">
       <header className="map-toolbar">
         <div className="coordinate-panel" aria-label="Set map coordinates">
@@ -42,32 +42,96 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
           </div>
           <label className="coordinate-field">
             <span>Latitude</span>
-            <input className="hazard-map_latitude" type="number" min="-90" max="90" step="any" placeholder="6.9271" value={latitude} onChange={(e) => setLatitude(e.target.value)} />
+            <input
+              className="hazard-map_latitude"
+              type="number"
+              min="-90"
+              max="90"
+              step="any"
+              placeholder="6.9271"
+              value={latitude}
+              onChange={(e) => setLatitude(e.target.value)}
+            />
           </label>
           <label className="coordinate-field">
             <span>Longitude</span>
-            <input className="hazard-map_longitude" type="number" min="-180" max="180" step="any" placeholder="79.8612" value={longitude} onChange={(e) => setLongitude(e.target.value)} />
+            <input
+              className="hazard-map_longitude"
+              type="number"
+              min="-180"
+              max="180"
+              step="any"
+              placeholder="79.8612"
+              value={longitude}
+              onChange={(e) => setLongitude(e.target.value)}
+            />
           </label>
         </div>
         <nav className="map-auth-actions" aria-label="Account actions">
-          {session ? (
-            <>
-              <span className="map-signed-in">Signed in as <strong>{session.user.username}</strong></span>
-              <button type="button" className="map-auth-button map-auth-button--login" onClick={onLogout}>Sign out</button>
-            </>
-          ) : (
-            <>
-              <button type="button" className="map-auth-button map-auth-button--login" onClick={() => setAuthMode("login")}>Login</button>
-              <button type="button" className="map-auth-button map-auth-button--register" onClick={() => setAuthMode("register")}>Register</button>
-            </>
-          )}
+          <div className="map-auth-buttons">
+            {session ? (
+              <>
+                <span className="map-signed-in">
+                  Signed in as <strong>{session.user.username}</strong>
+                </span>
+                <button
+                  type="button"
+                  className="map-auth-button map-auth-button--login"
+                  onClick={onLogout}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="map-auth-button map-auth-button--login"
+                  onClick={() => setAuthMode("login")}
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  className="map-auth-button map-auth-button--register"
+                  onClick={() => setAuthMode("register")}
+                >
+                  Register
+                </button>
+              </>
+            )}
+          </div>
+          <div className="map-report-action">
+            <ReportDanger
+              location={{
+                latitude: Number(latitude),
+                longitude: Number(longitude),
+              }}
+            />
+          </div>
         </nav>
       </header>
       {authMode && (
         <div className="map-auth-backdrop" onClick={() => setAuthMode(null)}>
-          <section className="map-auth-card" onClick={(event) => event.stopPropagation()}>
-            <button className="map-auth-close" type="button" aria-label="Close" onClick={() => setAuthMode(null)}>×</button>
-            <Login initialMode={authMode} onAuthenticated={(data) => { onAuthenticated(data); setAuthMode(null); }} />
+          <section
+            className="map-auth-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              className="map-auth-close"
+              type="button"
+              aria-label="Close"
+              onClick={() => setAuthMode(null)}
+            >
+              ×
+            </button>
+            <Login
+              initialMode={authMode}
+              onAuthenticated={(data) => {
+                onAuthenticated(data);
+                setAuthMode(null);
+              }}
+            />
           </section>
         </div>
       )}
@@ -80,7 +144,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         <MapUpdater latitude={latitude} longitude={longitude} />
 
         {markers.map((marker) => (
@@ -93,6 +157,14 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
           </Marker>
         ))}
       </MapContainer>
+      <div className="map-report-action map-report-action--bottom">
+        <ReportDanger
+          location={{
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+          }}
+        />
+      </div>
     </div>
   );
 }
