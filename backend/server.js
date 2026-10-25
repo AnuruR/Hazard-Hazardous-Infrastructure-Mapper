@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js";
 
 // Load backend/.env regardless of the directory used to start Node.
 dotenv.config({ path: new URL("./.env", import.meta.url) });
@@ -19,6 +20,7 @@ app.get("/", (_req, res) => {
   res.json({ message: "Hazard Mapper API is running." });
 });
 app.use("/api", authRoutes);
+app.use("/api/report", reportRoutes);
 
 const port = process.env.PORT || 5000;
 
