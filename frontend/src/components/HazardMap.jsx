@@ -1,4 +1,11 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
 import { useEffect, useState } from "react";
@@ -16,10 +23,21 @@ function MapUpdater({ latitude, longitude }) {
   return null;
 }
 
+function MapClickHandler({ onLocationSelect }) {
+  useMapEvents({
+    click(e) {
+      onLocationSelect(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  return null;
+}
+
 export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [latitude, setLatitude] = useState(6.9271);
   const [longitude, setLongitude] = useState(79.8612);
   const [authMode, setAuthMode] = useState(null);
+  const [isReportFormOpen, setIsReportFormOpen] = useState(false);
   const markers = [
     {
       geocode: [Number(latitude), Number(longitude)],
@@ -102,12 +120,13 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             )}
           </div>
           <div className="map-report-action">
-            <ReportDanger
-              location={{
-                latitude: Number(latitude),
-                longitude: Number(longitude),
-              }}
-            />
+            <button
+              type="button"
+              className="map-report-button"
+              onClick={() => setIsReportFormOpen(true)}
+            >
+              Report Danger
+            </button>
           </div>
         </nav>
       </header>
@@ -147,6 +166,13 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
 
         <MapUpdater latitude={latitude} longitude={longitude} />
 
+        <MapClickHandler
+          onLocationSelect={(lat, lng) => {
+            setLatitude(lat);
+            setLongitude(lng);
+          }}
+        />
+
         {markers.map((marker) => (
           <Marker
             key={marker.geocode.join(",")}
@@ -158,13 +184,42 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
         ))}
       </MapContainer>
       <div className="map-report-action map-report-action--bottom">
+        <button
+          type="button"
+          className="map-report-button"
+          onClick={() => setIsReportFormOpen(true)}
+        >
+          Report Danger
+        </button>
+      </div>
+      {isReportFormOpen && (
+        <div
+          className="map-report-backdrop"
+          onClick={() => setIsReportFormOpen(false)}
+        >
+          <section
+            className="map-report-card"
+            aria-label="Report a hazard"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="map-auth-close"
+              aria-label="Close report form"
+              onClick={() => setIsReportFormOpen(false)}
+            >
+              ×
+            </button>
         <ReportDanger
           location={{
             latitude: Number(latitude),
             longitude: Number(longitude),
           }}
+          onSubmitted={() => setIsReportFormOpen(false)}
         />
-      </div>
+          </section>
+        </div>
+      )}
     </div>
   );
 }

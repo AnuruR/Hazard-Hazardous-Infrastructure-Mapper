@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-export default function ReportDanger({ location }) {
+export default function ReportDanger({ location, onSubmitted }) {
   const [reportData, setReportData] = useState({
     description: "",
     topic: "",
@@ -37,6 +37,7 @@ export default function ReportDanger({ location }) {
       );
 
       alert(response.data.message);
+      onSubmitted?.();
     } catch (error) {
       console.error("Report submission failed:", error);
       alert("Failed to submit the report.");
@@ -44,9 +45,9 @@ export default function ReportDanger({ location }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="report-danger-form" onSubmit={handleSubmit}>
       <label>
-        Hazard topic
+        <span>Hazard topic <span className="report-field-optional">Optional</span></span>
         <input
           name="topic"
           value={reportData.topic}
@@ -56,7 +57,7 @@ export default function ReportDanger({ location }) {
       </label>
 
       <label>
-        Description (optional)
+        <span>Description <span className="report-field-optional">Optional</span></span>
         <textarea
           name="description"
           value={reportData.description}
@@ -66,7 +67,7 @@ export default function ReportDanger({ location }) {
       </label>
 
       <label>
-        Severity
+        <span>Severity <span className="report-field-optional">Optional</span></span>
         <select
           name="severity"
           value={reportData.severity}
