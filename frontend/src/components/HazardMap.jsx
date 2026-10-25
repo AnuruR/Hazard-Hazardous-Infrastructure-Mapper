@@ -28,7 +28,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   ];
 
   const customIcon = new Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/5591/5591266.png",
+    iconUrl: "/map-pin.png",
     iconSize: [38, 38],
   });
 
