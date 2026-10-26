@@ -243,9 +243,9 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             />
           </label>
           <div className="coordinate-location" aria-live="polite" aria-atomic="true">
-            {locationLookupStatus === "loading" && "Finding town/city (optional)…"}
+            {locationLookupStatus === "loading" && "Finding town/city…"}
             {locationLookupStatus === "success" && getLocationName(locationDetails)}
-            {locationLookupStatus === "unavailable" && "Location name unavailable. You can still report."}
+            {locationLookupStatus === "unavailable" && "Location name unavailable."}
             {locationDetails.postcode && <span> · Postcode {locationDetails.postcode}</span>}
           </div>
           <a
