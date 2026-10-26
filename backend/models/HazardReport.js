@@ -25,7 +25,7 @@ export async function updateHazardReport(id, details) {
   const _id = new ObjectId(id);
   const update = {};
 
-  for (const field of ["topic", "description", "severity"]) {
+  for (const field of ["topic", "description", "severity", "locationDetails"]) {
     if (Object.hasOwn(details, field)) {
       update[field] = details[field];
     }

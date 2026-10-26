@@ -34,6 +34,39 @@ function MapClickHandler({ onLocationSelect }) {
   return null;
 }
 
+const NOMINATIM_URL = window.__HAZARD_NOMINATIM_URL__ ||
+  import.meta.env.VITE_NOMINATIM_URL ||
+  "https://nominatim.openstreetmap.org/reverse";
+
+function isValidCoordinates(latitude, longitude) {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  return latitude !== "" && longitude !== "" && Number.isFinite(lat) &&
+    Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+}
+
+function getLocationDetails(address) {
+  const details = {};
+  for (const field of ["city", "town", "postcode", "village", "municipality", "hamlet", "locality", "suburb"]) {
+    if (typeof address?.[field] === "string" && address[field].trim()) {
+      details[field] = address[field].trim();
+    }
+  }
+  return details;
+}
+
+function getLocationName(details) {
+  const cityAndTown = [details.city, details.town].filter((name, index, all) =>
+    name && all.findIndex((candidate) => candidate.toLocaleLowerCase() === name.toLocaleLowerCase()) === index
+  );
+  if (cityAndTown.length) return cityAndTown.join(", ");
+
+  for (const field of ["village", "municipality", "hamlet", "locality", "suburb"]) {
+    if (details[field]) return details[field];
+  }
+  return "";
+}
+
 export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [latitude, setLatitude] = useState(6.9271);
   const [longitude, setLongitude] = useState(79.8612);
@@ -42,7 +75,80 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [isCreatingReport, setIsCreatingReport] = useState(false);
   const [reportId, setReportId] = useState(null);
   const [reportError, setReportError] = useState("");
+  const [locationDetails, setLocationDetails] = useState({});
+  const [locationLookupStatus, setLocationLookupStatus] = useState("idle");
+  const [reportCoordinates, setReportCoordinates] = useState(null);
   const reportRequestInProgress = useRef(false);
+  const lookupTimer = useRef(null);
+  const lookupController = useRef(null);
+  const lookupId = useRef(0);
+  const locationCache = useRef(new Map());
+
+  const selectCoordinates = (lat, lng) => {
+    setLatitude(lat);
+    setLongitude(lng);
+    setLocationDetails({});
+    setLocationLookupStatus("idle");
+    lookupId.current += 1;
+    clearTimeout(lookupTimer.current);
+    lookupController.current?.abort();
+    lookupController.current = null;
+
+    if (!isValidCoordinates(lat, lng)) return;
+
+    const latitudeValue = Number(lat);
+    const longitudeValue = Number(lng);
+    const coordinateKey = `${latitudeValue},${longitudeValue}`;
+    if (locationCache.current.has(coordinateKey)) {
+      const cached = locationCache.current.get(coordinateKey);
+      setLocationDetails(cached);
+      setLocationLookupStatus(getLocationName(cached) ? "success" : "unavailable");
+      return;
+    }
+
+    setLocationLookupStatus("loading");
+    const currentLookupId = lookupId.current;
+    lookupTimer.current = setTimeout(async () => {
+      const controller = new AbortController();
+      lookupController.current = controller;
+      try {
+        const url = new URL(NOMINATIM_URL);
+        url.search = new URLSearchParams({
+          format: "jsonv2",
+          addressdetails: "1",
+          lat: String(latitudeValue),
+          lon: String(longitudeValue),
+        }).toString();
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Location lookup failed (${response.status}).`);
+        const result = await response.json();
+        if (!result || typeof result !== "object" || Array.isArray(result)) {
+          throw new Error("Location lookup returned an invalid response.");
+        }
+
+        const address = result.address && typeof result.address === "object" && !Array.isArray(result.address)
+          ? result.address
+          : {};
+        const resolvedLocationDetails = getLocationDetails(address);
+        if (currentLookupId !== lookupId.current) return;
+        locationCache.current.set(coordinateKey, resolvedLocationDetails);
+        setLocationDetails(resolvedLocationDetails);
+        setLocationLookupStatus(getLocationName(resolvedLocationDetails) ? "success" : "unavailable");
+      } catch (error) {
+        if (error?.name === "AbortError" || currentLookupId !== lookupId.current) return;
+        locationCache.current.set(coordinateKey, {});
+        setLocationDetails({});
+        setLocationLookupStatus("unavailable");
+      } finally {
+        if (currentLookupId === lookupId.current) lookupController.current = null;
+      }
+    }, 1000);
+  };
+
+  useEffect(() => () => {
+    clearTimeout(lookupTimer.current);
+    lookupController.current?.abort();
+  }, []);
 
   const startReport = async () => {
     if (reportRequestInProgress.current) return;
@@ -62,6 +168,8 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
       return;
     }
 
+    const selectedCoordinates = `${selectedLatitude},${selectedLongitude}`;
+    setReportCoordinates(selectedCoordinates);
     reportRequestInProgress.current = true;
     setIsCreatingReport(true);
     setReportError("");
@@ -91,7 +199,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const markers = [
     {
       geocode: [Number(latitude), Number(longitude)],
-      popUp: "Marker 1",
+      popUp: `Latitude: ${latitude.toPrecision(3)}, Longitude: ${longitude.toPrecision(3)}`,
     },
   ];
 
@@ -118,7 +226,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
               step="any"
               placeholder="6.9271"
               value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
+              onChange={(e) => selectCoordinates(e.target.value, longitude)}
             />
           </label>
           <label className="coordinate-field">
@@ -131,9 +239,23 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
               step="any"
               placeholder="79.8612"
               value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
+              onChange={(e) => selectCoordinates(latitude, e.target.value)}
             />
           </label>
+          <div className="coordinate-location" aria-live="polite" aria-atomic="true">
+            {locationLookupStatus === "loading" && "Finding town/city (optional)…"}
+            {locationLookupStatus === "success" && getLocationName(locationDetails)}
+            {locationLookupStatus === "unavailable" && "Location name unavailable. You can still report."}
+            {locationDetails.postcode && <span> · Postcode {locationDetails.postcode}</span>}
+          </div>
+          <a
+            className="coordinate-attribution"
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Location data © OpenStreetMap contributors
+          </a>
         </div>
         <nav className="map-auth-actions" aria-label="Account actions">
           <div className="map-auth-buttons">
@@ -219,8 +341,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
 
         <MapClickHandler
           onLocationSelect={(lat, lng) => {
-            setLatitude(lat);
-            setLongitude(lng);
+            selectCoordinates(lat, lng);
           }}
         />
 
@@ -276,6 +397,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             </button>
             <ReportDanger
               reportId={reportId}
+              locationDetails={reportCoordinates === `${Number(latitude)},${Number(longitude)}` ? locationDetails : {}}
               onSubmitted={() => setIsReportFormOpen(false)}
             />
           </section>
