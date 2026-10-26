@@ -2,7 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-export default function ReportDanger({ reportId, onSubmitted }) {
+export default function ReportDanger({ reportId, locationDetails, onSubmitted }) {
   const [reportData, setReportData] = useState({
     description: "",
     topic: "",
@@ -30,9 +30,17 @@ export default function ReportDanger({ reportId, onSubmitted }) {
     setIsSaving(true);
     setSaveError("");
     try {
+      const savedLocationDetails = Object.fromEntries(
+        ["city", "town", "postcode"]
+          .filter((field) => typeof locationDetails?.[field] === "string" && locationDetails[field].trim())
+          .map((field) => [field, locationDetails[field].trim()])
+      );
       const response = await axios.patch(
         `http://localhost:5000/api/report/${reportId}`,
-        reportData
+        {
+          ...reportData,
+          ...(Object.keys(savedLocationDetails).length ? { locationDetails: savedLocationDetails } : {}),
+        }
       );
 
       alert(response.data.message);

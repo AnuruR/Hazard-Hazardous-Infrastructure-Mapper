@@ -50,6 +50,25 @@ export async function updateReport(req, res) {
     }
   }
 
+  if (Object.hasOwn(body, "locationDetails")) {
+    const source = body.locationDetails;
+    if (!source || typeof source !== "object" || Array.isArray(source)) {
+      return res.status(400).json({ message: "locationDetails must be an object." });
+    }
+
+    const locationDetails = {};
+    for (const field of ["city", "town", "postcode"]) {
+      if (!Object.hasOwn(source, field)) continue;
+      const maxLength = field === "postcode" ? 32 : 300;
+      if (typeof source[field] !== "string" || source[field].length > maxLength) {
+        return res.status(400).json({ message: `locationDetails.${field} is invalid.` });
+      }
+      const value = source[field].trim();
+      if (value) locationDetails[field] = value;
+    }
+    if (Object.keys(locationDetails).length) details.locationDetails = locationDetails;
+  }
+
   if (details.severity && !["High", "Medium", "Low"].includes(details.severity)) {
     return res.status(400).json({ message: "Severity is invalid." });
   }
