@@ -1,13 +1,15 @@
 
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 
-export default function ReportDanger({ location, onSubmitted }) {
+export default function ReportDanger({ reportId, onSubmitted }) {
   const [reportData, setReportData] = useState({
     description: "",
     topic: "",
-    severity: "High",
+    severity: "",
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -21,26 +23,27 @@ export default function ReportDanger({ location, onSubmitted }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!location) {
-      alert("Please select a location on the map.");
+    if (!reportId || isSaving) {
       return;
     }
 
+    setIsSaving(true);
+    setSaveError("");
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/report",
-        {
-          latitude: location.latitude,
-          longitude: location.longitude,
-          ...reportData,
-        }
+      const response = await axios.patch(
+        `http://localhost:5000/api/report/${reportId}`,
+        reportData
       );
 
       alert(response.data.message);
       onSubmitted?.();
     } catch (error) {
       console.error("Report submission failed:", error);
-      alert("Failed to submit the report.");
+      setSaveError(
+        error.response?.data?.message || "Failed to update the saved report."
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -73,13 +76,17 @@ export default function ReportDanger({ location, onSubmitted }) {
           value={reportData.severity}
           onChange={handleChange}
         >
+          <option value="">Select severity (optional)</option>
           <option value="High">High</option>
           <option value="Medium">Medium</option>
           <option value="Low">Low</option>
         </select>
       </label>
 
-      <button type="submit">Report Danger</button>
+      {saveError && <p className="report-form-error" role="alert">{saveError}</p>}
+      <button type="submit" disabled={isSaving}>
+        {isSaving ? "Saving details…" : "Save details"}
+      </button>
     </form>
   );
 }

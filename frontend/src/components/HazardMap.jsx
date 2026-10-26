@@ -8,7 +8,8 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Icon } from "leaflet";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import Login from "./login";
 import ReportDanger from "./ReportDanger";
 
@@ -38,6 +39,55 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [longitude, setLongitude] = useState(79.8612);
   const [authMode, setAuthMode] = useState(null);
   const [isReportFormOpen, setIsReportFormOpen] = useState(false);
+  const [isCreatingReport, setIsCreatingReport] = useState(false);
+  const [reportId, setReportId] = useState(null);
+  const [reportError, setReportError] = useState("");
+  const reportRequestInProgress = useRef(false);
+
+  const startReport = async () => {
+    if (reportRequestInProgress.current) return;
+    const selectedLatitude = Number(latitude);
+    const selectedLongitude = Number(longitude);
+    if (
+      latitude === "" ||
+      longitude === "" ||
+      !Number.isFinite(selectedLatitude) ||
+      !Number.isFinite(selectedLongitude) ||
+      selectedLatitude < -90 ||
+      selectedLatitude > 90 ||
+      selectedLongitude < -180 ||
+      selectedLongitude > 180
+    ) {
+      setReportError("Enter valid latitude and longitude before reporting.");
+      return;
+    }
+
+    reportRequestInProgress.current = true;
+    setIsCreatingReport(true);
+    setReportError("");
+    try {
+      const response = await axios.post("http://localhost:5000/api/report", {
+        latitude: selectedLatitude,
+        longitude: selectedLongitude,
+      });
+      const createdReportId = response.data?.report?._id;
+      if (!createdReportId) {
+        throw new Error("The server did not return the saved report ID.");
+      }
+      setReportId(createdReportId);
+      setIsReportFormOpen(true);
+    } catch (error) {
+      console.error("Initial report creation failed:", error);
+      setReportError(
+        error.response?.data?.message ||
+          error.message ||
+          "Could not save the location report. Please try again."
+      );
+    } finally {
+      reportRequestInProgress.current = false;
+      setIsCreatingReport(false);
+    }
+  };
   const markers = [
     {
       geocode: [Number(latitude), Number(longitude)],
@@ -123,9 +173,10 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             <button
               type="button"
               className="map-report-button"
-              onClick={() => setIsReportFormOpen(true)}
+              onClick={startReport}
+              disabled={isCreatingReport}
             >
-              Report Danger
+              {isCreatingReport ? "Saving location…" : "Report Danger"}
             </button>
           </div>
         </nav>
@@ -187,11 +238,24 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
         <button
           type="button"
           className="map-report-button"
-          onClick={() => setIsReportFormOpen(true)}
+          onClick={startReport}
+          disabled={isCreatingReport}
         >
-          Report Danger
+          {isCreatingReport ? "Saving location…" : "Report Danger"}
         </button>
       </div>
+      {reportError && (
+        <div className="map-report-error" role="alert">
+          {reportError}
+          <button
+            type="button"
+            onClick={() => setReportError("")}
+            aria-label="Dismiss error"
+          >
+            ×
+          </button>
+        </div>
+      )}
       {isReportFormOpen && (
         <div
           className="map-report-backdrop"
@@ -210,13 +274,10 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             >
               ×
             </button>
-        <ReportDanger
-          location={{
-            latitude: Number(latitude),
-            longitude: Number(longitude),
-          }}
-          onSubmitted={() => setIsReportFormOpen(false)}
-        />
+            <ReportDanger
+              reportId={reportId}
+              onSubmitted={() => setIsReportFormOpen(false)}
+            />
           </section>
         </div>
       )}

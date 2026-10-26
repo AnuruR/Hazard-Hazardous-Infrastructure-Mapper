@@ -58,6 +58,7 @@ body {
 .map-report-action { display: flex; align-items: center; justify-content: center; }
 .map-report-button { min-height: 38px; padding: 0 16px; border: 0; border-radius: 9px; background: #a61f1f; color: #fff; box-shadow: 0 5px 12px rgba(127, 29, 29, 0.22); font: 700 13px system-ui, sans-serif; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; white-space: nowrap; }
 .map-report-button:hover { background: #851818; transform: translateY(-1px); }
+.map-report-button:disabled, .report-danger-form button[type="submit"]:disabled { cursor: wait; opacity: 0.72; transform: none; }
 .map-report-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .map-report-action--bottom { position: fixed; z-index: 1001; bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); }
 .map-report-backdrop { position: fixed; z-index: 1300; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(44, 22, 13, 0.42); backdrop-filter: blur(4px); }
@@ -70,6 +71,9 @@ body {
 .report-danger-form input:focus, .report-danger-form textarea:focus, .report-danger-form select:focus { border-color: #b84a24; box-shadow: 0 0 0 3px rgba(184, 74, 36, 0.16); }
 .report-danger-form button[type="submit"] { min-height: 44px; border: 0; border-radius: 10px; background: #a61f1f; color: white; box-shadow: 0 7px 16px rgba(127, 29, 29, 0.22); font: 700 14px system-ui, sans-serif; cursor: pointer; }
 .report-danger-form button[type="submit"]:hover { background: #851818; }
+.report-form-error { margin: 0; color: #9b1c1c; font-size: 13px; font-weight: 650; }
+.map-report-error { position: fixed; z-index: 1301; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 54px); left: 50%; display: flex; align-items: center; gap: 12px; width: max-content; max-width: min(90vw, 560px); padding: 11px 14px; transform: translateX(-50%); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px; background: rgba(255, 248, 238, 0.97); color: #8c1d18; box-shadow: 0 8px 24px rgba(67, 28, 12, 0.22); font: 600 13px/1.4 system-ui, sans-serif; }
+.map-report-error button { flex: 0 0 auto; border: 0; background: none; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; }
 .map-auth-backdrop { position: absolute; z-index: 1200; inset: 0; display: grid; place-items: center; padding: 20px; background: rgba(44, 22, 13, 0.32); backdrop-filter: blur(3px); }
 .map-auth-card { position: relative; width: min(100%, 440px); padding: 38px; border: 1px solid rgba(255, 255, 255, 0.55); border-radius: 24px; background: rgba(255, 248, 238, 0.94); box-shadow: 0 24px 70px rgba(57, 22, 9, 0.3); backdrop-filter: blur(18px); }
 .map-auth-close { position: absolute; z-index: 1; top: 12px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(113, 53, 31, 0.1); color: #71351f; font-size: 23px; cursor: pointer; }
