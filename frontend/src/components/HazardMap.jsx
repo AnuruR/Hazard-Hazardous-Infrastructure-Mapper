@@ -108,6 +108,8 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [latitude, setLatitude] = useState(6.9271);
   const [longitude, setLongitude] = useState(79.8612);
 
+  const [showMarkers, setShowMarkers] = useState(true);
+
   const [authMode, setAuthMode] = useState(null);
   const [isReportFormOpen, setIsReportFormOpen] = useState(false);
   const [isCreatingReport, setIsCreatingReport] = useState(false);
@@ -397,7 +399,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
 
         <MapUpdater latitude={latitude} longitude={longitude} />
 
-        <HazardMarkers/>
+        {showMarkers && <HazardMarkers />}
 
         <MapClickHandler
           onLocationSelect={(lat, lng) => {
@@ -416,6 +418,13 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
         ))}
       </MapContainer>
       <div className="map-report-action map-report-action--bottom">
+        <button
+          className="map-marker-toggle"
+          type="button"
+          onClick={() => setShowMarkers((prev) => !prev)}
+        >
+          {showMarkers ? "Hide Markers" : "Show Markers"}
+        </button>
         <button
           type="button"
           className="map-report-button"
@@ -464,7 +473,6 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
               }
               onSubmitted={() => setIsReportFormOpen(false)}
             />
-            
           </section>
         </div>
       )}
