@@ -19,6 +19,10 @@ const HazardMarkers = () => {
     };
 
     fetchReports();
+
+    const intervalId = setInterval(fetchReports, 3600000); //10000 means 10seconds
+
+    return () => clearInterval(intervalId);
   }, []);
   return (
     <>
