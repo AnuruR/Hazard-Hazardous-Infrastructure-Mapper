@@ -33,8 +33,8 @@ const HazardMarkers = () => {
         >
           <Popup>
             <strong>Reported Hazard</strong>
-            <p>Latitude: {report.latitude}</p>
-            <p>Longitude: {report.longitude}</p>
+            <p>Latitude: {Number(report.latitude).toFixed(3)}</p>
+            <p>Longitude: {Number(report.longitude).toFixed(3)}</p>
 
             {report.topic && <p>Type: {report.topic}</p>}
             {report.severity && <p>Severity: {report.severity}</p>}

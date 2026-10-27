@@ -369,14 +369,14 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             className="map-auth-card"
             onClick={(event) => event.stopPropagation()}
           >
-            <button
+            {session && (<button
               className="map-auth-close"
               type="button"
               aria-label="Close"
               onClick={() => setAuthMode(null)}
             >
               ×
-            </button>
+            </button>)}
             <Login
               initialMode={authMode}
               onAuthenticated={(data) => {
@@ -399,8 +399,8 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
 
         <MapUpdater latitude={latitude} longitude={longitude} />
 
-        {showMarkers && <HazardMarkers />}
-
+        {session && showMarkers && <HazardMarkers />}
+        
         <MapClickHandler
           onLocationSelect={(lat, lng) => {
             selectCoordinates(lat, lng);
