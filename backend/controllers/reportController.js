@@ -1,6 +1,7 @@
 import {
   reportHazard,
   updateHazardReport,
+  fetchAllReports
 } from "../models/HazardReport.js";
 
 export async function createReport(req, res) {
@@ -30,6 +31,16 @@ export async function createReport(req, res) {
     res.status(500).json({
       message: "Failed to report hazard",
     });
+  }
+}
+
+export async function getAllReports(req, res) {
+  try {
+    const reports = await fetchAllReports();
+    res.json({ reports });
+  } catch (error) {
+    console.error("Failed to fetch reports:", error);
+    res.status(500).json({ message: "Failed to fetch reports." });
   }
 }
 

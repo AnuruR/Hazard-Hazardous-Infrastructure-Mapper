@@ -41,3 +41,7 @@ export async function updateHazardReport(id, details) {
     { returnDocument: "after" }
   );
 }
+
+export async function fetchAllReports() {
+  return hazardreports().find().toArray();
+}

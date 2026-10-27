@@ -12,6 +12,14 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Login from "./login";
 import ReportDanger from "./ReportDanger";
+import HazardMarkers from "./features/HazardMarkers";
+
+const customIcon = new Icon({
+  iconUrl: "../map-pin.png",
+  iconSize: [38, 38],
+  iconAnchor: [19, 38],
+  popupAnchor: [0, -34],
+});
 
 function MapUpdater({ latitude, longitude }) {
   const map = useMap();
@@ -34,20 +42,38 @@ function MapClickHandler({ onLocationSelect }) {
   return null;
 }
 
-const NOMINATIM_URL = window.__HAZARD_NOMINATIM_URL__ ||
+const NOMINATIM_URL =
+  window.__HAZARD_NOMINATIM_URL__ ||
   import.meta.env.VITE_NOMINATIM_URL ||
   "https://nominatim.openstreetmap.org/reverse";
 
 function isValidCoordinates(latitude, longitude) {
   const lat = Number(latitude);
   const lng = Number(longitude);
-  return latitude !== "" && longitude !== "" && Number.isFinite(lat) &&
-    Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  return (
+    latitude !== "" &&
+    longitude !== "" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
 }
 
 function getLocationDetails(address) {
   const details = {};
-  for (const field of ["city", "town", "postcode", "village", "municipality", "hamlet", "locality", "suburb"]) {
+  for (const field of [
+    "city",
+    "town",
+    "postcode",
+    "village",
+    "municipality",
+    "hamlet",
+    "locality",
+    "suburb",
+  ]) {
     if (typeof address?.[field] === "string" && address[field].trim()) {
       details[field] = address[field].trim();
     }
@@ -56,12 +82,23 @@ function getLocationDetails(address) {
 }
 
 function getLocationName(details) {
-  const cityAndTown = [details.city, details.town].filter((name, index, all) =>
-    name && all.findIndex((candidate) => candidate.toLocaleLowerCase() === name.toLocaleLowerCase()) === index
+  const cityAndTown = [details.city, details.town].filter(
+    (name, index, all) =>
+      name &&
+      all.findIndex(
+        (candidate) =>
+          candidate.toLocaleLowerCase() === name.toLocaleLowerCase(),
+      ) === index,
   );
   if (cityAndTown.length) return cityAndTown.join(", ");
 
-  for (const field of ["village", "municipality", "hamlet", "locality", "suburb"]) {
+  for (const field of [
+    "village",
+    "municipality",
+    "hamlet",
+    "locality",
+    "suburb",
+  ]) {
     if (details[field]) return details[field];
   }
   return "";
@@ -70,6 +107,7 @@ function getLocationName(details) {
 export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [latitude, setLatitude] = useState(6.9271);
   const [longitude, setLongitude] = useState(79.8612);
+
   const [authMode, setAuthMode] = useState(null);
   const [isReportFormOpen, setIsReportFormOpen] = useState(false);
   const [isCreatingReport, setIsCreatingReport] = useState(false);
@@ -102,7 +140,9 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
     if (locationCache.current.has(coordinateKey)) {
       const cached = locationCache.current.get(coordinateKey);
       setLocationDetails(cached);
-      setLocationLookupStatus(getLocationName(cached) ? "success" : "unavailable");
+      setLocationLookupStatus(
+        getLocationName(cached) ? "success" : "unavailable",
+      );
       return;
     }
 
@@ -120,35 +160,49 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
           lon: String(longitudeValue),
         }).toString();
         const response = await fetch(url, { signal: controller.signal });
-        if (!response.ok) throw new Error(`Location lookup failed (${response.status}).`);
+        if (!response.ok)
+          throw new Error(`Location lookup failed (${response.status}).`);
         const result = await response.json();
         if (!result || typeof result !== "object" || Array.isArray(result)) {
           throw new Error("Location lookup returned an invalid response.");
         }
 
-        const address = result.address && typeof result.address === "object" && !Array.isArray(result.address)
-          ? result.address
-          : {};
+        const address =
+          result.address &&
+          typeof result.address === "object" &&
+          !Array.isArray(result.address)
+            ? result.address
+            : {};
         const resolvedLocationDetails = getLocationDetails(address);
         if (currentLookupId !== lookupId.current) return;
         locationCache.current.set(coordinateKey, resolvedLocationDetails);
         setLocationDetails(resolvedLocationDetails);
-        setLocationLookupStatus(getLocationName(resolvedLocationDetails) ? "success" : "unavailable");
+        setLocationLookupStatus(
+          getLocationName(resolvedLocationDetails) ? "success" : "unavailable",
+        );
       } catch (error) {
-        if (error?.name === "AbortError" || currentLookupId !== lookupId.current) return;
+        if (
+          error?.name === "AbortError" ||
+          currentLookupId !== lookupId.current
+        )
+          return;
         locationCache.current.set(coordinateKey, {});
         setLocationDetails({});
         setLocationLookupStatus("unavailable");
       } finally {
-        if (currentLookupId === lookupId.current) lookupController.current = null;
+        if (currentLookupId === lookupId.current)
+          lookupController.current = null;
       }
     }, 1000);
   };
 
-  useEffect(() => () => {
-    clearTimeout(lookupTimer.current);
-    lookupController.current?.abort();
-  }, []);
+  useEffect(
+    () => () => {
+      clearTimeout(lookupTimer.current);
+      lookupController.current?.abort();
+    },
+    [],
+  );
 
   const startReport = async () => {
     if (reportRequestInProgress.current) return;
@@ -189,24 +243,20 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
       setReportError(
         error.response?.data?.message ||
           error.message ||
-          "Could not save the location report. Please try again."
+          "Could not save the location report. Please try again.",
       );
     } finally {
       reportRequestInProgress.current = false;
       setIsCreatingReport(false);
     }
   };
+
   const markers = [
     {
       geocode: [Number(latitude), Number(longitude)],
       popUp: `Latitude: ${latitude.toPrecision(3)}, Longitude: ${longitude.toPrecision(3)}`,
     },
   ];
-
-  const customIcon = new Icon({
-    iconUrl: "/map-pin.png",
-    iconSize: [38, 38],
-  });
 
   return (
     <div className="hazard-map">
@@ -242,11 +292,19 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
               onChange={(e) => selectCoordinates(latitude, e.target.value)}
             />
           </label>
-          <div className="coordinate-location" aria-live="polite" aria-atomic="true">
+          <div
+            className="coordinate-location"
+            aria-live="polite"
+            aria-atomic="true"
+          >
             {locationLookupStatus === "loading" && "Finding town/city…"}
-            {locationLookupStatus === "success" && getLocationName(locationDetails)}
-            {locationLookupStatus === "unavailable" && "Location name unavailable."}
-            {locationDetails.postcode && <span> · Postcode {locationDetails.postcode}</span>}
+            {locationLookupStatus === "success" &&
+              getLocationName(locationDetails)}
+            {locationLookupStatus === "unavailable" &&
+              "Location name unavailable."}
+            {locationDetails.postcode && (
+              <span> · Postcode {locationDetails.postcode}</span>
+            )}
           </div>
           <a
             className="coordinate-attribution"
@@ -339,6 +397,8 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
 
         <MapUpdater latitude={latitude} longitude={longitude} />
 
+        <HazardMarkers/>
+
         <MapClickHandler
           onLocationSelect={(lat, lng) => {
             selectCoordinates(lat, lng);
@@ -397,9 +457,14 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             </button>
             <ReportDanger
               reportId={reportId}
-              locationDetails={reportCoordinates === `${Number(latitude)},${Number(longitude)}` ? locationDetails : {}}
+              locationDetails={
+                reportCoordinates === `${Number(latitude)},${Number(longitude)}`
+                  ? locationDetails
+                  : {}
+              }
               onSubmitted={() => setIsReportFormOpen(false)}
             />
+            
           </section>
         </div>
       )}
