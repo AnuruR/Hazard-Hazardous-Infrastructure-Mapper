@@ -1,9 +1,32 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Marker, Popup } from "react-leaflet";
+import ResolveButton from "./ResolveButton";
 
 const HazardMarkers = () => {
   const [reports, setReports] = useState([]);
+
+  const handleResolve = async (reportId) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:5000/api/report/${reportId}`,
+        { resolved: "Yes" },
+      );
+
+      setReports((previousReports) =>
+        previousReports.map((report) =>
+          report._id === reportId ? response.data.report : report,
+        ),
+      );
+
+      console.log("Hazard marked as resolved:", reportId);
+    } catch (error) {
+      console.error(
+        "Failed to mark hazard as resolved:",
+        error.response?.data ?? error.message,
+      );
+    }
+  };
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -39,6 +62,17 @@ const HazardMarkers = () => {
             {report.topic && <p>Type: {report.topic}</p>}
             {report.severity && <p>Severity: {report.severity}</p>}
             {report.description && <p>{report.description}</p>}
+
+            <ResolveButton
+              report={report}
+              onResolved={(updatedReport) => {
+                setReports((previousReports) =>
+                  previousReports.map((item) =>
+                    item._id === updatedReport._id ? updatedReport : item,
+                  ),
+                );
+              }}
+            />
           </Popup>
         </Marker>
       ))}

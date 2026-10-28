@@ -16,6 +16,7 @@ export async function reportHazard(detail) {
     topic: detail.topic ?? "",
     severity: detail.severity ?? "High",
     createdAt: new Date(),
+    resolved: detail.resolved ?? "No"
   };
   const { insertedId } = await hazardreports().insertOne(reportData);
   return { ...reportData, _id: insertedId };
@@ -25,7 +26,7 @@ export async function updateHazardReport(id, details) {
   const _id = new ObjectId(id);
   const update = {};
 
-  for (const field of ["topic", "description", "severity", "locationDetails"]) {
+  for (const field of ["topic", "description", "severity", "locationDetails", "resolved"]) {
     if (Object.hasOwn(details, field)) {
       update[field] = details[field];
     }
