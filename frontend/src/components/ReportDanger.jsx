@@ -36,7 +36,7 @@ export default function ReportDanger({ reportId, locationDetails, onSubmitted })
           .map((field) => [field, locationDetails[field].trim()])
       );
       const response = await axios.patch(
-        `http://localhost:5000/api/report/${reportId}`,
+        `/api/report/${reportId}`,
         {
           ...reportData,
           ...(Object.keys(savedLocationDetails).length ? { locationDetails: savedLocationDetails } : {}),

@@ -13,7 +13,7 @@ const UndoResolveButton = ({ report, onResolved }) => {
 
     try {
       const response = await axios.patch(
-        `http://localhost:5000/api/report/${report._id}`,
+        `/api/report/${report._id}`,
         { resolved: "No" }
       );
 

@@ -20,7 +20,7 @@ export default function UndoReportDanger({
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/report/${encodeURIComponent(reportId)}`
+        `/api/report/${encodeURIComponent(reportId)}`
       );
 
       onUndoSuccess?.(reportId);
