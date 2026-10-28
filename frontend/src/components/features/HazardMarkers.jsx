@@ -61,7 +61,11 @@ const HazardMarkers = () => {
             <p>Longitude: {Number(report.longitude).toFixed(3)}</p>
 
             {report.topic && <p>Type: {report.topic}</p>}
-            {report.severity && <p>Severity: {report.severity}</p>}
+            {report.severity && (
+              <p>
+                Severity: <span className={`hazard-severity hazard-severity--${String(report.severity).toLowerCase()}`}>{report.severity}</span>
+              </p>
+            )}
             {report.description && <p>{report.description}</p>}
 
             <ResolveButton
