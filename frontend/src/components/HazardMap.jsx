@@ -13,6 +13,7 @@ import axios from "axios";
 import Login from "./login";
 import ReportDanger from "./ReportDanger";
 import HazardMarkers from "./features/HazardMarkers";
+import UndoReportDanger from "./UndoReportDanger";
 
 const customIcon = new Icon({
   iconUrl: "../map-pin.png",
@@ -109,6 +110,8 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const [longitude, setLongitude] = useState(79.8612);
 
   const [showMarkers, setShowMarkers] = useState(true);
+
+  const [lastReportedHazard, setLastReportedHazard] = useState(null);
 
   const [authMode, setAuthMode] = useState(null);
   const [isReportFormOpen, setIsReportFormOpen] = useState(false);
@@ -234,11 +237,14 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
         latitude: selectedLatitude,
         longitude: selectedLongitude,
       });
-      const createdReportId = response.data?.report?._id;
-      if (!createdReportId) {
+      const createdReport = response.data?.report;
+
+      if (!createdReport?._id) {
         throw new Error("The server did not return the saved report ID.");
       }
-      setReportId(createdReportId);
+
+      setReportId(createdReport._id);
+      setLastReportedHazard(createdReport);
       setIsReportFormOpen(true);
     } catch (error) {
       console.error("Initial report creation failed:", error);
@@ -369,14 +375,16 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
             className="map-auth-card"
             onClick={(event) => event.stopPropagation()}
           >
-            {session && (<button
-              className="map-auth-close"
-              type="button"
-              aria-label="Close"
-              onClick={() => setAuthMode(null)}
-            >
-              ×
-            </button>)}
+            {session && (
+              <button
+                className="map-auth-close"
+                type="button"
+                aria-label="Close"
+                onClick={() => setAuthMode(null)}
+              >
+                ×
+              </button>
+            )}
             <Login
               initialMode={authMode}
               onAuthenticated={(data) => {
@@ -400,7 +408,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
         <MapUpdater latitude={latitude} longitude={longitude} />
 
         {session && showMarkers && <HazardMarkers />}
-        
+
         <MapClickHandler
           onLocationSelect={(lat, lng) => {
             selectCoordinates(lat, lng);
@@ -473,6 +481,16 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
               }
               onSubmitted={() => setIsReportFormOpen(false)}
             />
+            {lastReportedHazard?._id && (
+              <UndoReportDanger
+                reportId={lastReportedHazard._id}
+                onUndoSuccess={(deletedId) => {
+                  setLastReportedHazard(null);
+                  setReportId(null);
+                  setIsReportFormOpen(false);
+                }}
+              />
+            )}
           </section>
         </div>
       )}

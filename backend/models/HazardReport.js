@@ -46,3 +46,15 @@ export async function updateHazardReport(id, details) {
 export async function fetchAllReports() {
   return hazardreports().find().toArray();
 }
+
+export async function deleteReportById(id) {
+  if (!ObjectId.isValid(id)) {
+    return null;
+  }
+
+  const result = await getDB()
+    .collection("hazard_reports")
+    .deleteOne({ _id: new ObjectId(id) });
+
+  return result.deletedCount === 1;
+}

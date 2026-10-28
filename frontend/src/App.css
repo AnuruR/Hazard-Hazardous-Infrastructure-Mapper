@@ -88,6 +88,12 @@ body {
 .report-danger-form input:focus, .report-danger-form textarea:focus, .report-danger-form select:focus { border-color: #b84a24; box-shadow: 0 0 0 3px rgba(184, 74, 36, 0.16); }
 .report-danger-form button[type="submit"] { min-height: 44px; border: 0; border-radius: 10px; background: #a61f1f; color: white; box-shadow: 0 7px 16px rgba(127, 29, 29, 0.22); font: 700 14px system-ui, sans-serif; cursor: pointer; }
 .report-danger-form button[type="submit"]:hover { background: #851818; }
+.undo-report-container { display: grid; gap: 8px; margin-top: 4px; }
+.undo-report-button { min-height: 42px; padding: 0 14px; border: 1px solid rgba(120, 62, 31, 0.2); border-radius: 10px; background: rgba(255, 255, 255, 0.82); color: #71351f; box-shadow: 0 4px 10px rgba(82, 28, 12, 0.08), inset 0 1px rgba(255, 255, 255, 0.9); font: 700 14px system-ui, sans-serif; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease; }
+.undo-report-button:hover:not(:disabled) { background: #fff; transform: translateY(-1px); }
+.undo-report-button:focus-visible { outline: 3px solid #b84a24; outline-offset: 2px; }
+.undo-report-button:disabled { cursor: wait; opacity: 0.65; }
+.undo-report-error { color: #9b1c1c; font-size: 13px; font-weight: 650; }
 .report-form-error { margin: 0; color: #9b1c1c; font-size: 13px; font-weight: 650; }
 .map-report-error { position: fixed; z-index: 1301; bottom: calc(max(18px, env(safe-area-inset-bottom)) + 54px); left: 50%; display: flex; align-items: center; gap: 12px; width: max-content; max-width: min(90vw, 560px); padding: 11px 14px; transform: translateX(-50%); border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 12px; background: rgba(255, 248, 238, 0.97); color: #8c1d18; box-shadow: 0 8px 24px rgba(67, 28, 12, 0.22); font: 600 13px/1.4 system-ui, sans-serif; }
 .map-report-error button { flex: 0 0 auto; border: 0; background: none; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; }
