@@ -1,6 +1,7 @@
 import {
   reportHazard,
   updateHazardReport,
+  fetchAllReports,
 } from "../models/HazardReport.js";
 
 export async function createReport(req, res) {
@@ -33,6 +34,16 @@ export async function createReport(req, res) {
   }
 }
 
+export async function getAllReports(req, res) {
+  try {
+    const reports = await fetchAllReports();
+    res.json({ reports });
+  } catch (error) {
+    console.error("Failed to fetch reports:", error);
+    res.status(500).json({ message: "Failed to fetch reports." });
+  }
+}
+
 export async function updateReport(req, res) {
   const { id } = req.params;
   if (!/^[a-f\d]{24}$/i.test(id)) {
@@ -41,6 +52,17 @@ export async function updateReport(req, res) {
 
   const body = req.body ?? {};
   const details = {};
+
+  if (Object.hasOwn(body, "resolved")) {
+    if (!["Yes", "No"].includes(body.resolved)) {
+      return res.status(400).json({
+        message: 'resolved must be either "Yes" or "No".',
+      });
+    }
+
+    details.resolved = body.resolved;
+  }
+
   for (const field of ["topic", "description", "severity"]) {
     if (Object.hasOwn(body, field)) {
       if (typeof body[field] !== "string") {
@@ -53,23 +75,34 @@ export async function updateReport(req, res) {
   if (Object.hasOwn(body, "locationDetails")) {
     const source = body.locationDetails;
     if (!source || typeof source !== "object" || Array.isArray(source)) {
-      return res.status(400).json({ message: "locationDetails must be an object." });
+      return res
+        .status(400)
+        .json({ message: "locationDetails must be an object." });
     }
 
     const locationDetails = {};
     for (const field of ["city", "town", "postcode"]) {
       if (!Object.hasOwn(source, field)) continue;
       const maxLength = field === "postcode" ? 32 : 300;
-      if (typeof source[field] !== "string" || source[field].length > maxLength) {
-        return res.status(400).json({ message: `locationDetails.${field} is invalid.` });
+      if (
+        typeof source[field] !== "string" ||
+        source[field].length > maxLength
+      ) {
+        return res
+          .status(400)
+          .json({ message: `locationDetails.${field} is invalid.` });
       }
       const value = source[field].trim();
       if (value) locationDetails[field] = value;
     }
-    if (Object.keys(locationDetails).length) details.locationDetails = locationDetails;
+    if (Object.keys(locationDetails).length)
+      details.locationDetails = locationDetails;
   }
 
-  if (details.severity && !["High", "Medium", "Low"].includes(details.severity)) {
+  if (
+    details.severity &&
+    !["High", "Medium", "Low"].includes(details.severity)
+  ) {
     return res.status(400).json({ message: "Severity is invalid." });
   }
 
