@@ -2,6 +2,7 @@ import {
   reportHazard,
   updateHazardReport,
   fetchAllReports,
+  deleteReportById
 } from "../models/HazardReport.js";
 
 export async function createReport(req, res) {
@@ -115,5 +116,36 @@ export async function updateReport(req, res) {
   } catch (error) {
     console.error("Report update failed:", error);
     return res.status(500).json({ message: "Failed to update report." });
+  }
+}
+
+export async function deleteReport(req, res) {
+  const { id } = req.params;
+  
+  if (!/^[a-f\d]{24}$/i.test(id)) {
+    return res.status(400).json({
+      message: "Report ID is invalid.",
+    });
+  }
+
+  try {
+    const deleted = await deleteReportById(id);
+
+    if (!deleted) {
+      return res.status(404).json({
+        message: "Report not found.",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Hazard report successfully undone.",
+      reportId: id,
+    });
+  } catch (error) {
+    console.error("Report deletion failed:", error);
+
+    return res.status(500).json({
+      message: "Failed to undo hazard report.",
+    });
   }
 }
