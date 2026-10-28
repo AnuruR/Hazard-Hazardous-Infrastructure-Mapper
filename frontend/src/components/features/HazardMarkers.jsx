@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Marker, Popup } from "react-leaflet";
 import ResolveButton from "./ResolveButton";
+import UndoResolveButton from "./UndoResolveButton";
 
 const HazardMarkers = () => {
   const [reports, setReports] = useState([]);
@@ -64,6 +65,16 @@ const HazardMarkers = () => {
             {report.description && <p>{report.description}</p>}
 
             <ResolveButton
+              report={report}
+              onResolved={(updatedReport) => {
+                setReports((previousReports) =>
+                  previousReports.map((item) =>
+                    item._id === updatedReport._id ? updatedReport : item,
+                  ),
+                );
+              }}
+            />
+            <UndoResolveButton
               report={report}
               onResolved={(updatedReport) => {
                 setReports((previousReports) =>

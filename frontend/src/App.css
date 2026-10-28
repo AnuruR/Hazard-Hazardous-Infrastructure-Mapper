@@ -63,10 +63,14 @@ body {
 .map-report-button:hover { background: #851818; transform: translateY(-1px); }
 .map-report-button:disabled, .report-danger-form button[type="submit"]:disabled { cursor: wait; opacity: 0.72; transform: none; }
 .map-report-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-.resolve-button { min-height: 36px; margin-top: 6px; padding: 0 13px; border: 1px solid rgba(255, 255, 255, 0.48); border-radius: 9px; background: #287a3d; color: #fff8ee; box-shadow: 0 5px 12px rgba(24, 82, 39, 0.22); font: 700 12px system-ui, sans-serif; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease; }
+.resolve-button { display: block; width: 148px; min-height: 36px; margin-top: 6px; padding: 0 10px; border: 1px solid rgba(255, 255, 255, 0.48); border-radius: 9px; background: #287a3d; color: #fff8ee; box-shadow: 0 5px 12px rgba(24, 82, 39, 0.22); font: 700 12px system-ui, sans-serif; text-align: center; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease; }
 .resolve-button:hover:not(:disabled) { background: #1f6130; transform: translateY(-1px); }
 .resolve-button:focus-visible { outline: 3px solid #63b878; outline-offset: 2px; }
 .resolve-button:disabled { cursor: default; opacity: 0.72; }
+.undo-resolve-button { display: block; width: 148px; min-height: 36px; margin-top: 6px; padding: 0 10px; border: 1px solid rgba(120, 62, 31, 0.2); border-radius: 9px; background: rgba(113, 53, 31, 0.1); color: #71351f; box-shadow: 0 4px 10px rgba(82, 28, 12, 0.1); font: 700 12px system-ui, sans-serif; text-align: center; cursor: pointer; transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease; }
+.undo-resolve-button:hover:not(:disabled) { background: rgba(113, 53, 31, 0.18); transform: translateY(-1px); }
+.undo-resolve-button:focus-visible { outline: 3px solid #b84a24; outline-offset: 2px; }
+.undo-resolve-button:disabled { cursor: default; opacity: 0.65; }
 .map-report-action--bottom { position: fixed; z-index: 1001; bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; display: flex; align-items: center; gap: 18px; transform: translateX(-50%); }
 .map-marker-toggle { position: static; min-height: 38px; padding: 0 22px; border: 0; border-radius: 9px; background: #a61f1f; color: #fff; box-shadow: 0 5px 12px rgba(127, 29, 29, 0.22); font: 700 13px system-ui, sans-serif; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; white-space: nowrap; }
 .map-marker-toggle:hover { background: #851818; transform: translateY(-1px); }
