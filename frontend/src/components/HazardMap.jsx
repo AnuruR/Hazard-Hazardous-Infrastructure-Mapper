@@ -233,7 +233,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
     setIsCreatingReport(true);
     setReportError("");
     try {
-      const response = await axios.post("http://localhost:5000/api/report", {
+      const response = await axios.post("/api/report", {
         latitude: selectedLatitude,
         longitude: selectedLongitude,
       });
