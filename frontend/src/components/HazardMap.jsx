@@ -262,7 +262,7 @@ export default function HazardMap({ session, onAuthenticated, onLogout }) {
   const markers = [
     {
       geocode: [Number(latitude), Number(longitude)],
-      popUp: `Latitude: ${latitude.toPrecision(3)}, Longitude: ${longitude.toPrecision(3)}`,
+      popUp: `Latitude: ${latitude}, Longitude: ${longitude}`,
     },
   ];
 
