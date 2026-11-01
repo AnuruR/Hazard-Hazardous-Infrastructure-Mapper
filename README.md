@@ -280,23 +280,9 @@ No automated test script or test suite is configured in the inspected package ma
 
 ## Limitations and future improvements
 
-Current limitations evidenced by the implementation:
+Current limitations:
 
 - Report routes do not enforce authentication, ownership, or a deletion time window; the undo restriction is only represented by where the control appears in the UI.
-- The app has no production deployment configuration in this repository.
-- No automated test suite is configured.
-- Marker data is refreshed hourly rather than through live updates.
 - Reverse-geocoding and map-tile availability depend on external services and network access.
-- Screenshots still need to be captured from a running application.
 
-Possible future work includes enforcing report authorization and ownership in the API, adding automated tests, improving loading/error and accessibility states, preparing deployment configuration, and considering offline reporting. These are proposals, not current features.
-
-## License and academic project information
-
-The root repository does not contain a license file. The backend package manifest declares `ISC`, but this is not a repository-wide license declaration; confirm the intended project license before redistribution.
-
-**Academic project:** Hazard – Hazardous Infrastructure Mapper  
-**Institution:** [Add institution]  
-**Course / module:** [Add course or module]  
-**Student(s):** [Add name(s) / ID(s)]  
-**Supervisor:** [Add supervisor]
+Possible future work includes enforcing report authorization and ownership in the API, adding automated tests, improving loading/error and accessibility states, and considering offline reporting. These are proposals, not current features.
