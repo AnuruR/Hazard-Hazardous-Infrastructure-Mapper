@@ -251,20 +251,6 @@ A successful response has this shape (the generated `_id` and timestamp vary):
 }
 ```
 
-## Screenshots
-
-No genuine application screenshots were present in the repository when this README was prepared. Capture these from a running local application with non-sensitive sample data, then save them under `docs/screenshots/` using the filenames below. Replace the pending entries with embedded Markdown images after capture; no placeholder image files are included.
-
-- `map-overview.png` — map and coordinate controls.
-- `report-submission.png` — selected coordinates and report detail form.
-- `report-popup.png` — a report marker popup showing available details.
-- `resolution-controls.png` — unresolved and resolved controls in the report popup.
-- `login.png` — sign-in screen.
-- `registration.png` — account creation screen.
-- `undo-report-confirmation.png` — the undo action and its confirmation prompt.
-
-For the academic submission, capture each view from the actual application and add it here, for example: `![Map overview](docs/screenshots/map-overview.png)`. Do not use mockups or generated graphics as application screenshots.
-
 ## User workflow
 
 1. Open the Vite URL to load the map. The initial view is centered on Colombo.
