@@ -2,6 +2,8 @@
 
 Hazard is a university project that provides an interactive map for reporting and reviewing potentially hazardous locations. It supports quick coordinate-based submissions, optional report details, and a view of community reports so people can communicate location information clearly.
 
+visit: https://hazard-hazardous-infrastructure-map.vercel.app
+
 The current application includes a React map, report submission and detail editing, account registration and login, report markers, and resolution status controls. The backend stores reports and users in MongoDB. The map uses OpenStreetMap tiles; optional reverse geocoding displays and stores city, town, and postcode details when available.
 
 ## Key features
